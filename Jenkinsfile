@@ -32,10 +32,11 @@ pipeline {
       chmod -R +x node_modules/.bin || true
       npm ci
       npx playwright install
-      npx playwright test --headed=false
+      npx playwright test --headless
     '''
   }
 }
+
 
 
 
