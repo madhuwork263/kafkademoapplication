@@ -40,18 +40,19 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-      steps {
-        // ✅ Must match name in Jenkins → Manage Jenkins → Configure System → SonarQube servers
-        withSonarQubeEnv('SonarQubeServer') {
-          sh """
-            mvn sonar:sonar \
-              -Dsonar.projectKey=kafka_demo \
-              -Dsonar.host.url=${SONAR_HOST_URL} \
-              -Dsonar.login=${SONAR_TOKEN}
-          """
-        }
-      }
+  steps {
+    // Must match exactly the Name field in Jenkins → Configure System → SonarQube installations
+    withSonarQubeEnv('SonarQubeServer') {
+      sh """
+        mvn sonar:sonar \
+          -Dsonar.projectKey=kafka_demo \
+          -Dsonar.host.url=${SONAR_HOST_URL} \
+          -Dsonar.login=${SONAR_TOKEN}
+      """
     }
+  }
+}
+
 
     stage('Docker Build') {
       steps {
