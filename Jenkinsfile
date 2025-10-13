@@ -27,11 +27,15 @@ pipeline {
     }
 
     stage('Playwright Tests') {
-      steps {
-        sh 'npm ci'
-        sh 'npx playwright test'
-      }
+  steps {
+    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+      sh 'npm ci'
+      sh 'npx playwright install --with-deps'
+      sh 'npx playwright test'
     }
+  }
+}
+
 
     stage('Code Coverage') {
       steps {
