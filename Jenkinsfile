@@ -26,16 +26,19 @@ pipeline {
       }
     }
 
-    stage('Playwright Tests') {
-      steps {
-        sh '''
-          chmod -R +x node_modules/.bin || true
-          npm ci
-          npx playwright install --with-deps
-          CI=true npx playwright test
-        '''
-      }
-    }
+   stage('Playwright Tests') {
+  steps {
+    sh '''
+      chmod -R +x node_modules/.bin || true
+      npm ci
+      # Install browsers locally (no sudo)
+      npx playwright install chromium
+      # Run tests in headless CI mode
+      CI=true npx playwright test
+    '''
+  }
+}
+
 
     stage('Code Coverage') {
       steps {
