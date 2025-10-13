@@ -42,7 +42,7 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         // ✅ Must match name in Jenkins → Manage Jenkins → Configure System → SonarQube servers
-        withSonarQubeEnv('sonarqube') {
+        withSonarQubeEnv('SonarQubeServer') {
           sh """
             mvn sonar:sonar \
               -Dsonar.projectKey=kafka_demo \
