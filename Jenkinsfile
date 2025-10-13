@@ -8,8 +8,8 @@ pipeline {
   }
 
   environment {
-    SONAR_HOST_URL = 'http://localhost:9000'
-    SONAR_TOKEN = credentials('sonarqube-token')
+    SONAR_HOST_URL = 'http://139.59.14.75:9000'  // ✅ your actual SonarQube server
+    SONAR_TOKEN = credentials('sonarqube-token') // ✅ Jenkins credential ID
   }
 
   stages {
@@ -29,16 +29,13 @@ pipeline {
     stage('Playwright Tests') {
       steps {
         script {
-          try {
-            sh '''
-              chmod -R +x node_modules/.bin || true
-              npm ci || true
-              npx playwright install || true
-              CI=true npx playwright test || true
-            '''
-          } catch (err) {
-            echo "⚠️ Playwright test failed, skipping for now..."
-          }
+          echo "🧪 Running Playwright tests..."
+          sh '''
+            chmod -R +x node_modules/.bin || true
+            npm ci || true
+            npx playwright install --with-deps || true
+            CI=true npx playwright test || true
+          '''
         }
       }
     }
@@ -52,12 +49,15 @@ pipeline {
     stage('SonarQube Analysis') {
       steps {
         withSonarQubeEnv('SonarQubeServer') {
-          sh """
+          // ✅ Secure single-quoted block, prevents Groovy token exposure
+          sh '''
             mvn sonar:sonar \
               -Dsonar.projectKey=kafka_demo \
-              -Dsonar.host.url=${SONAR_HOST_URL} \
-              -Dsonar.login=${SONAR_TOKEN}
-          """
+              -Dsonar.projectName="Kafka Demo Application" \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_TOKEN \
+              -Dsonar.projectBaseDir=$WORKSPACE
+          '''
         }
       }
     }
@@ -72,6 +72,7 @@ pipeline {
   post {
     always {
       script {
+        echo "📦 Archiving test results and artifacts..."
         junit '**/target/surefire-reports/*.xml'
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
       }
