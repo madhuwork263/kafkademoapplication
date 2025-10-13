@@ -26,15 +26,19 @@ pipeline {
       }
     }
 
-    stage('Playwright Tests') {
-  steps {
-    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-      sh 'npm ci'
-      sh 'npx playwright install --with-deps'
-      sh 'npx playwright test'
+   stage('Playwright Tests') {
+    steps {
+        script {
+            sh '''
+                npm ci
+                # install browsers without sudo prompt
+                npx playwright install --with-deps || npx playwright install
+                npx playwright test
+            '''
+        }
     }
-  }
 }
+
 
 
     stage('Code Coverage') {
