@@ -26,25 +26,22 @@ pipeline {
       }
     }
 
-  stage('Playwright Tests') {
-  steps {
-    script {
-      // Run Playwright, but do NOT fail the build even if it errors
-      try {
-        sh '''
-          chmod -R +x node_modules/.bin || true
-          npm ci || true
-          npx playwright install || true
-          CI=true npx playwright test || true
-        '''
-      } catch (err) {
-        echo "⚠️ Playwright test failed, skipping for now..."
+    stage('Playwright Tests') {
+      steps {
+        script {
+          try {
+            sh '''
+              chmod -R +x node_modules/.bin || true
+              npm ci || true
+              npx playwright install || true
+              CI=true npx playwright test || true
+            '''
+          } catch (err) {
+            echo "⚠️ Playwright test failed, skipping for now..."
+          }
+        }
       }
     }
-  }
-}
-
-
 
     stage('Code Coverage') {
       steps {
@@ -72,9 +69,8 @@ pipeline {
     }
   }
 
- post {
-  always {
-    node {
+  post {
+    always {
       script {
         junit '**/target/surefire-reports/*.xml'
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
