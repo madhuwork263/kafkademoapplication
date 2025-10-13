@@ -29,7 +29,7 @@ pipeline {
   stage('Playwright Tests') {
   steps {
     sh '''
-      npx playwright install --with-deps || true
+      npx playwright install 
       npm ci
       npx playwright test
     '''
