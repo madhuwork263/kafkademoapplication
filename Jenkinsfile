@@ -26,17 +26,17 @@ pipeline {
       }
     }
 
-    stage('Playwright Tests') {
-      steps {
-        // ✅ Added fix to set executable permissions before running Playwright
-        sh '''
-          chmod -R +x node_modules/.bin || true
-          npm ci
-          npx playwright install 
-          npx playwright test
-        '''
-      }
-    }
+   stage('Playwright Tests') {
+  steps {
+    sh '''
+      chmod -R +x node_modules/.bin || true
+      npm ci
+      npx playwright install
+      npx playwright test
+    '''
+  }
+}
+
 
     stage('Code Coverage') {
       steps {
