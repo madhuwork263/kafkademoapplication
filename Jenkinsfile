@@ -27,16 +27,15 @@ pipeline {
     }
 
   stage('Playwright Tests') {
-    steps {
-        script {
-            sh '''
-                npm ci
-                # Browsers already installed, no need to reinstall
-                npx playwright test
-            '''
-        }
-    }
+  steps {
+    sh '''
+      npx playwright install --with-deps || true
+      npm ci
+      npx playwright test
+    '''
+  }
 }
+
 
 
 
