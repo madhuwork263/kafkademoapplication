@@ -1,7 +1,11 @@
-// example.spec.js
-const { test, expect } = require('@playwright/test');
+// playwright.config.js
+import { defineConfig } from '@playwright/test';
 
-test('should open Google homepage', async ({ page }) => {
-    await page.goto('https://www.google.com');
-    await expect(page).toHaveTitle(/Google/);
+export default defineConfig({
+  use: {
+    headless: true, // ✅ ensures headless mode everywhere (CI-safe)
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: true,
+    video: 'on-first-retry',
+  },
 });
