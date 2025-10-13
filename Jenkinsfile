@@ -26,13 +26,13 @@ pipeline {
       }
     }
 
-  stage('Playwright Tests') {
+ stage('Playwright Tests') {
   steps {
     sh '''
       chmod -R +x node_modules/.bin || true
       npm ci
       npx playwright install
-      npx playwright test --headless
+      CI=true npx playwright test
     '''
   }
 }
