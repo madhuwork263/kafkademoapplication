@@ -53,14 +53,15 @@ stage('SonarQube Analysis') {
     withSonarQubeEnv('SonarQubeServer') {
       withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
         sh '''
-          echo "Running SonarQube analysis with token..."
+          echo "Running SonarQube analysis..."
           mvn sonar:sonar \
             -Dsonar.projectKey=kafka_demo \
             -Dsonar.projectName="Kafka Demo Application" \
-            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.host.url=http://139.59.14.75:9000 \
             -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.projectBaseDir=$WORKSPACE
         '''
+        echo "SonarQube analysis step completed ✅"
       }
     }
   }
