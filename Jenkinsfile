@@ -48,22 +48,23 @@ pipeline {
         sh 'mvn jacoco:report'
       }
     }
-
-    // ✅ Fixed SonarQube Analysis section
-    stage('SonarQube Analysis') {
-      steps {
-        withSonarQubeEnv('SonarQubeServer') {
-          sh '''
-            mvn sonar:sonar \
-              -Dsonar.projectKey=kafka_demo \
-              -Dsonar.projectName="Kafka Demo Application" \
-              -Dsonar.host.url=$SONAR_HOST_URL \
-              -Dsonar.login=$SONAR_TOKEN \
-              -Dsonar.projectBaseDir=$WORKSPACE
-          '''
-        }
+stage('SonarQube Analysis') {
+  steps {
+    withSonarQubeEnv('SonarQubeServer') {
+      withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
+        sh '''
+          mvn sonar:sonar \
+            -Dsonar.projectKey=kafka_demo \
+            -Dsonar.projectName="Kafka Demo Application" \
+            -Dsonar.host.url=$SONAR_HOST_URL \
+            -Dsonar.login=$TOKEN \
+            -Dsonar.projectBaseDir=$WORKSPACE
+        '''
       }
     }
+  }
+}
+
 
     stage('Docker Build') {
       steps {
