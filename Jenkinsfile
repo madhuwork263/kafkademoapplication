@@ -51,19 +51,21 @@ pipeline {
 stage('SonarQube Analysis') {
   steps {
     withSonarQubeEnv('SonarQubeServer') {
-      withCredentials([string(credentialsId: 'sonarqube-token', variable: 'TOKEN')]) {
+      withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
         sh '''
+          echo "Running SonarQube analysis with token..."
           mvn sonar:sonar \
             -Dsonar.projectKey=kafka_demo \
             -Dsonar.projectName="Kafka Demo Application" \
             -Dsonar.host.url=$SONAR_HOST_URL \
-            -Dsonar.login=$TOKEN \
+            -Dsonar.login=$SONAR_TOKEN \
             -Dsonar.projectBaseDir=$WORKSPACE
         '''
       }
     }
   }
 }
+
 
 
     stage('Docker Build') {
