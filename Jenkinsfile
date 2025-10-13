@@ -2,24 +2,25 @@ pipeline {
   agent any
 
   tools {
-    jdk 'jdk21'
-    maven 'maven3'
-    nodejs 'node18'
+    jdk 'jdk21'           // must match Global Tool Config
+    maven 'Maven3'        // ✅ correct name (case-sensitive)
+    nodejs 'Node18'       // ✅ correct name (case-sensitive)
   }
 
   environment {
     SONAR_HOST_URL = 'http://localhost:9000'
-    SONAR_TOKEN = credentials('sonar-token') // store token under Jenkins credentials
+    SONAR_TOKEN = credentials('sonar-token') // Jenkins credential ID for Sonar token
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         git branch: 'main', url: 'https://github.com/sathya2003ME/kafkademoapplication.git'
       }
     }
 
-    stage('Build and Test') {
+    stage('Build and Unit Test') {
       steps {
         sh 'mvn clean verify -DskipIntegrationTests=true'
       }
@@ -32,7 +33,7 @@ pipeline {
       }
     }
 
-    stage('Code Coverage Report') {
+    stage('Code Coverage') {
       steps {
         sh 'mvn jacoco:report'
       }
@@ -40,8 +41,14 @@ pipeline {
 
     stage('SonarQube Analysis') {
       steps {
-        withSonarQubeEnv('sonar-server') {
-          sh "mvn sonar:sonar -Dsonar.projectKey=kafka_demo -Dsonar.host.url=${SONAR_HOST_URL} -Dsonar.login=${SONAR_TOKEN}"
+        // ✅ Must match name in Jenkins → Manage Jenkins → Configure System → SonarQube servers
+        withSonarQubeEnv('sonarqube') {
+          sh """
+            mvn sonar:sonar \
+              -Dsonar.projectKey=kafka_demo \
+              -Dsonar.host.url=${SONAR_HOST_URL} \
+              -Dsonar.login=${SONAR_TOKEN}
+          """
         }
       }
     }
@@ -55,8 +62,11 @@ pipeline {
 
   post {
     always {
-      junit '**/target/surefire-reports/*.xml'
-      archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+      // ✅ Run in a node context so Jenkins has workspace
+      script {
+        junit '**/target/surefire-reports/*.xml'
+        archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+      }
     }
   }
 }
