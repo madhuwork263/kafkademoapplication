@@ -3,8 +3,8 @@ pipeline {
 
   tools {
     jdk 'jdk21'           // must match Global Tool Config
-    maven 'Maven3'        // ✅ correct name (case-sensitive)
-    nodejs 'Node18'       // ✅ correct name (case-sensitive)
+    maven 'maven3'        // ✅ correct name (case-sensitive)
+    nodejs 'node18'       // ✅ correct name (case-sensitive)
   }
 
   environment {
