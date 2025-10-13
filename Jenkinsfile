@@ -26,18 +26,18 @@ pipeline {
       }
     }
 
-   stage('Playwright Tests') {
+  stage('Playwright Tests') {
     steps {
         script {
             sh '''
                 npm ci
-                # install browsers without sudo prompt
-                npx playwright install --with-deps || npx playwright install
+                # Browsers already installed, no need to reinstall
                 npx playwright test
             '''
         }
     }
 }
+
 
 
 
