@@ -32,7 +32,7 @@ pipeline {
         sh '''
           chmod -R +x node_modules/.bin || true
           npm ci
-          npx playwright install --with-deps
+          npx playwright install 
           npx playwright test
         '''
       }
