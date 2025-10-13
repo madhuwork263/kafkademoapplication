@@ -3,8 +3,8 @@ pipeline {
 
   tools {
     jdk 'jdk21'           // must match Global Tool Config
-    maven 'maven3'        // ✅ correct name (case-sensitive)
-    nodejs 'node18'       // ✅ correct name (case-sensitive)
+    maven 'maven3'        // correct name (case-sensitive)
+    nodejs 'node18'       // correct name (case-sensitive)
   }
 
   environment {
@@ -26,19 +26,17 @@ pipeline {
       }
     }
 
-  stage('Playwright Tests') {
-  steps {
-    sh '''
-      npx playwright install 
-      npm ci
-      npx playwright test
-    '''
-  }
-}
-
-
-
-
+    stage('Playwright Tests') {
+      steps {
+        // ✅ Added fix to set executable permissions before running Playwright
+        sh '''
+          chmod -R +x node_modules/.bin || true
+          npm ci
+          npx playwright install --with-deps
+          npx playwright test
+        '''
+      }
+    }
 
     stage('Code Coverage') {
       steps {
@@ -47,19 +45,18 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-  steps {
-    // Must match exactly the Name field in Jenkins → Configure System → SonarQube installations
-    withSonarQubeEnv('SonarQubeServer') {
-      sh """
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.host.url=${SONAR_HOST_URL} \
-          -Dsonar.login=${SONAR_TOKEN}
-      """
+      steps {
+        // Must match the name in Jenkins > Manage Jenkins > Configure System > SonarQube installations
+        withSonarQubeEnv('SonarQubeServer') {
+          sh """
+            mvn sonar:sonar \
+              -Dsonar.projectKey=kafka_demo \
+              -Dsonar.host.url=${SONAR_HOST_URL} \
+              -Dsonar.login=${SONAR_TOKEN}
+          """
+        }
+      }
     }
-  }
-}
-
 
     stage('Docker Build') {
       steps {
@@ -70,7 +67,7 @@ pipeline {
 
   post {
     always {
-      // ✅ Run in a node context so Jenkins has workspace
+      // ✅ Ensures test results + artifacts always get published
       script {
         junit '**/target/surefire-reports/*.xml'
         archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
