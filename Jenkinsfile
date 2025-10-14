@@ -49,16 +49,24 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-  environment {
-    SONAR_TOKEN = credentials('SONAR_TOKEN')
-  }
   steps {
-    sh '''
+    sh '''#!/bin/bash
+      echo "=== SonarQube Analysis Started ==="
+      
+      SONAR_HOST_URL="http://139.59.14.75:9000"
+      SONAR_TOKEN="sqa_81bd82ffcd67f939b9a68722c380048d52f38be4"
+
+      echo "🔍 Validating token..."
+      curl -s -u $SONAR_TOKEN: $SONAR_HOST_URL/api/authentication/validate
+
+      echo "🚀 Running SonarQube analysis..."
       mvn sonar:sonar \
         -Dsonar.projectKey=kafka_demo \
         -Dsonar.projectName="Kafka Demo Application" \
-        -Dsonar.host.url=http://139.59.14.75:9000 \
+        -Dsonar.host.url=$SONAR_HOST_URL \
         -Dsonar.login=$SONAR_TOKEN
+
+      echo "✅ SonarQube Analysis Completed"
     '''
   }
 }
