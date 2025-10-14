@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-    SONAR_HOST_URL = 'http://139.59.14.75:9000'     // ✅ Your SonarQube server
+    SONAR_HOST_URL = 'http://139.59.14.75:9000'   // ✅ SonarQube server
   }
 
   stages {
@@ -49,29 +49,29 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-  steps {
-    withSonarQubeEnv('SonarQubeServer') {
-      sh '''
-        echo "Running SonarQube analysis..."
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.projectName="Kafka Demo Application" \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.projectBaseDir=$WORKSPACE
-      '''
-      echo "✅ SonarQube analysis completed successfully."
+      steps {
+        withSonarQubeEnv('SonarQubeServer') {
+          sh '''
+            echo "Running SonarQube analysis..."
+            mvn sonar:sonar \
+              -Dsonar.projectKey=kafka_demo \
+              -Dsonar.projectName="Kafka Demo Application" \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONAR_AUTH_TOKEN \
+              -Dsonar.projectBaseDir=$WORKSPACE
+          '''
+          echo "✅ SonarQube analysis completed successfully."
+        }
+      }
     }
-  }
-}
 
-stage('Quality Gate') {
-  steps {
-    timeout(time: 5, unit: 'MINUTES') {
-      waitForQualityGate abortPipeline: true
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
     }
-  }
-}
-
 
     stage('Docker Build') {
       when {
