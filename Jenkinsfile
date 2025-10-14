@@ -55,28 +55,30 @@ pipeline {
         echo "=== SonarQube Debug Info ==="
         echo "SonarQube URL: $SONAR_HOST_URL"
 
-        # ✅ Check if token exists
+        # ✅ Ensure token exists
         if [ -z "$SONAR_AUTH_TOKEN" ]; then
           echo "❌ ERROR: SONAR_AUTH_TOKEN is empty. Check Jenkins -> Manage Jenkins -> Configure System -> SonarQube Servers"
           exit 1
         else
-          echo "✅ Token detected (hidden for security)"
+          echo "✅ Token detected (hidden)"
         fi
 
         echo "🔍 Validating token..."
         curl -s -u $SONAR_AUTH_TOKEN: $SONAR_HOST_URL/api/authentication/validate
 
-        echo "🚀 Running SonarQube analysis..."
+        echo "🚀 Running SonarQube analysis with explicit token..."
+        export SONAR_TOKEN=$SONAR_AUTH_TOKEN
         mvn sonar:sonar \
           -Dsonar.projectKey=kafka_demo \
           -Dsonar.projectName="Kafka Demo Application" \
           -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.token=$SONAR_AUTH_TOKEN \
+          -Dsonar.token=$SONAR_TOKEN \
           -Dsonar.projectBaseDir=$WORKSPACE
       '''
     }
   }
 }
+
 
 
 
