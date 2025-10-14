@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-    SONAR_HOST_URL = 'http://139.59.14.75:9000'   // ✅ SonarQube server
+    SONAR_HOST_URL = 'http://139.59.14.75:9000'   // ✅ SonarQube server URL
   }
 
   stages {
@@ -49,38 +49,34 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-  steps {
-    withSonarQubeEnv('SonarQubeServer') {
-      sh '''
-        echo "=== SonarQube Analysis Started ==="
-        echo "SonarQube URL: $SONAR_HOST_URL"
-        echo "🔍 Checking token length..."
-        echo "Token length: ${#SONAR_AUTH_TOKEN}"
+      steps {
+        // 🔐 Use your stored token credential ID here
+        withCredentials([string(credentialsId: 'SONAR_VALID_TOKEN', variable: 'SONAR_TOKEN')]) {
+          // 🔧 Use SonarQube environment configuration
+          withSonarQubeEnv('SonarQubeServer') {
+            sh '''
+              echo "=== SonarQube Analysis Started ==="
+              echo "SonarQube URL: $SONAR_HOST_URL"
+              echo "✅ Token length: ${#SONAR_TOKEN}"
 
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.projectName="Kafka Demo Application" \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_AUTH_TOKEN
-      '''
+              mvn sonar:sonar \
+                -Dsonar.projectKey=kafka_demo \
+                -Dsonar.projectName="Kafka Demo Application" \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.login=$SONAR_TOKEN
+            '''
+          }
+        }
+      }
     }
-  }
-}
 
-
-
-
-
-
-
-stage('Quality Gate') {
-  steps {
-    timeout(time: 5, unit: 'MINUTES') {
-      waitForQualityGate abortPipeline: true
+    stage('Quality Gate') {
+      steps {
+        timeout(time: 5, unit: 'MINUTES') {
+          waitForQualityGate abortPipeline: true
+        }
+      }
     }
-  }
-}
-
 
     stage('Docker Build') {
       when {
