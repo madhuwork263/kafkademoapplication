@@ -64,27 +64,37 @@ pipeline {
       }
     }
 
-    /* ========== 5️⃣ SONARQUBE ANALYSIS ========== */
     stage('SonarQube Analysis') {
-      steps {
-        echo "🔍 Running SonarQube static analysis..."
-        dir('.') {
-          withSonarQubeEnv('SonarQubeServer') {
-            sh '''
-              echo "=== SonarQube Analysis Started ==="
-              echo "SonarQube URL: $SONAR_HOST_URL"
-              echo "🔑 Token length: ${#SONARQUBE}"
+  steps {
+    echo "🔍 Running SonarQube static analysis..."
+    dir('.') {
+      withSonarQubeEnv('SonarQubeServer') {
+        sh '''
+          echo "=== SonarQube Analysis Started ==="
+          echo "SonarQube URL: $SONAR_HOST_URL"
 
-              mvn sonar:sonar \
-                -Dsonar.projectKey=kafkademoapplication \
-                -Dsonar.projectName="Kafka Demo Application" \
-                -Dsonar.host.url=$SONAR_HOST_URL \
-                -Dsonar.login=$SONARQUBE
-            '''
-          }
-        }
+          if [ -n "$CHANGE_ID" ]; then
+            echo "🧩 Running SonarQube for Pull Request #$CHANGE_ID"
+            mvn sonar:sonar \
+              -Dsonar.projectKey=kafkademoapplication \
+              -Dsonar.projectName="Kafka Demo Application" \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONARQUBE \
+              -Dsonar.pullrequest.key=$CHANGE_ID \
+              -Dsonar.pullrequest.branch=$CHANGE_BRANCH \
+              -Dsonar.pullrequest.base=$CHANGE_TARGET
+          else
+            mvn sonar:sonar \
+              -Dsonar.projectKey=kafkademoapplication \
+              -Dsonar.projectName="Kafka Demo Application" \
+              -Dsonar.host.url=$SONAR_HOST_URL \
+              -Dsonar.login=$SONARQUBE
+          fi
+        '''
       }
     }
+  }
+}
 
    
     /* ========== 7️⃣ DOCKER BUILD ========== */
