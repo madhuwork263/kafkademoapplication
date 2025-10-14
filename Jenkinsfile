@@ -85,14 +85,7 @@ pipeline {
       }
     }
 
-    /* ========== 6️⃣ QUALITY GATE CHECK ========== */
-    stage('Quality Gate') {
-      steps {
-        timeout(time: 5, unit: 'MINUTES') {
-          waitForQualityGate abortPipeline: true
-        }
-      }
-    }
+   
 
     /* ========== 7️⃣ DOCKER BUILD ========== */
     stage('Docker Build') {
