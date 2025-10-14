@@ -113,3 +113,27 @@ pipeline {
 
     /* ========== 8️⃣ PUBLISH REPORTS ========== */
     stage('Publish Reports') {
+      steps {
+        echo "📈 Archiving test and coverage reports..."
+        jacoco execPattern: '**/target/jacoco.exec',
+               classPattern: '**/target/classes',
+               sourcePattern: '**/src/main/java',
+               inclusionPattern: '**/*.class',
+               exclusionPattern: '**/test/**'
+
+        archiveArtifacts artifacts: 'target/site/jacoco/**', allowEmptyArchive: true
+        archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true
+      }
+    }
+  }
+
+  /* ========== 🔚 POST BUILD ACTIONS ========== */
+  post {
+    success {
+      echo "✅ All stages completed successfully — Build, Test, Sonar, and Docker done!"
+    }
+    failure {
+      echo "❌ Pipeline failed. Check logs for failed stage details."
+    }
+  }
+}
