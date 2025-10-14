@@ -49,26 +49,22 @@ pipeline {
     }
 
     stage('SonarQube Analysis') {
-      steps {
-        // 🔐 Use your stored token credential ID here
-        withCredentials([string(credentialsId: 'SONAR_VALID_TOKEN', variable: 'SONAR_TOKEN')]) {
-          // 🔧 Use SonarQube environment configuration
-          withSonarQubeEnv('SonarQubeServer') {
-            sh '''
-              echo "=== SonarQube Analysis Started ==="
-              echo "SonarQube URL: $SONAR_HOST_URL"
-              echo "✅ Token length: ${#SONAR_TOKEN}"
+  steps {
+    withSonarQubeEnv('SonarQubeServer') {
+      sh '''
+        echo "🔐 Using Sonar token..."
+        echo "Sonar URL: $SONAR_HOST_URL"
+        echo "Token length: ${#SONAR_AUTH_TOKEN}"
 
-              mvn sonar:sonar \
-                -Dsonar.projectKey=kafka_demo \
-                -Dsonar.projectName="Kafka Demo Application" \
-                -Dsonar.host.url=$SONAR_HOST_URL \
-                -Dsonar.login=$SONAR_TOKEN
-            '''
-          }
-        }
-      }
+        mvn sonar:sonar \
+          -Dsonar.projectKey=kafka_demo \
+          -Dsonar.projectName="Kafka Demo Application" \
+          -Dsonar.host.url=$SONAR_HOST_URL \
+          -Dsonar.login=$SONAR_AUTH_TOKEN
+      '''
     }
+  }
+}
 
     stage('Quality Gate') {
       steps {
