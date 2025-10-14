@@ -67,12 +67,13 @@ pipeline {
         curl -s -u $SONAR_AUTH_TOKEN: $SONAR_HOST_URL/api/authentication/validate
 
         echo "🚀 Running SonarQube analysis..."
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.projectName="Kafka Demo Application" \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.login=$SONAR_AUTH_TOKEN \
-          -Dsonar.projectBaseDir=$WORKSPACE
+       mvn sonar:sonar \
+  -Dsonar.projectKey=kafka_demo \
+  -Dsonar.projectName="Kafka Demo Application" \
+  -Dsonar.host.url=$SONAR_HOST_URL \
+  -Dsonar.token=$SONAR_AUTH_TOKEN \
+  -Dsonar.projectBaseDir=$WORKSPACE
+
       '''
     }
   }
