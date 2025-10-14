@@ -36,24 +36,31 @@ pipeline {
       }
     }
 
-    /* ========== 3️⃣ PLAYWRIGHT TESTS ========== */
     stage('Playwright Tests') {
-      steps {
-        script {
-          echo "🎭 Running Playwright tests..."
-          try {
-            sh '''
-              chmod -R +x node_modules/.bin || true
-              npm ci || true
-              npx playwright install --with-deps || true
-              CI=true npx playwright test || true
-            '''
-          } catch (err) {
-            echo "⚠️ Playwright tests failed or skipped..."
-          }
-        }
+  steps {
+    script {
+      echo "🎭 Running Playwright tests..."
+      try {
+        sh '''
+          # Install node modules
+          npm ci
+
+          # Install Playwright browsers (no sudo, user-local install)
+          npx playwright install chromium --force
+
+          # Verify browser installation
+          npx playwright install-deps || true
+
+          # Run tests headlessly
+          CI=true npx playwright test --browser=chromium || true
+        '''
+      } catch (err) {
+        echo "⚠️ Playwright tests failed or skipped..."
       }
     }
+  }
+}
+
 
     /* ========== 4️⃣ CODE COVERAGE ========== */
     stage('Code Coverage') {
