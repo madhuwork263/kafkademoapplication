@@ -51,7 +51,7 @@ pipeline {
     stage('SonarQube Analysis') {
   steps {
     withSonarQubeEnv('SonarQubeServer') {
-      sh '''
+      sh '''#!/bin/bash
         echo "=== SonarQube Debug Info ==="
         echo "SonarQube URL: $SONAR_HOST_URL"
 
@@ -77,6 +77,7 @@ pipeline {
     }
   }
 }
+
 
 
 
