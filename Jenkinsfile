@@ -68,22 +68,19 @@ pipeline {
 
         echo "🚀 Running SonarQube analysis with explicit token..."
         export SONAR_TOKEN=$SONAR_AUTH_TOKEN
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.projectName="Kafka Demo Application" \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.token=$SONAR_TOKEN \
-          -Dsonar.projectBaseDir=$WORKSPACE
-      '''
+       mvn sonar:sonar \
+  -Dsonar.projectKey=kafka_demo \
+  -Dsonar.projectName="Kafka Demo Application" \
+  -Dsonar.host.url=http://139.59.14.75:9000 \
+  -Dsonar.login=sqa_b1c402b9dc02562354a751e65474f73abdc339cb \
+  -Dsonar.projectBaseDir=$WORKSPACE
+  '''
     }
   }
 }
 
 
-
-
-
-    stage('Quality Gate') {
+stage('Quality Gate') {
       steps {
         timeout(time: 5, unit: 'MINUTES') {
           waitForQualityGate abortPipeline: true
