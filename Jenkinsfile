@@ -8,7 +8,7 @@ pipeline {
   }
 
   environment {
-    SONAR_HOST_URL = 'http://139.59.14.75:9000'   // ✅ Your SonarQube server URL
+       
     SONARQUBE = credentials('SONAR_AUTH_TOKEN')   // ✅ Use your actual Jenkins credential ID
   }
 
