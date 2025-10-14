@@ -8,13 +8,13 @@ pipeline {
   }
 
   environment {
-       
-    SONARQUBE = credentials('SONAR_AUTH_TOKEN')   // ✅ Use your actual Jenkins credential ID
+    SONAR_HOST_URL = 'http://139.59.14.75:9000'
+    SONARQUBE = credentials('SONAR_AUTH_TOKEN')
   }
 
   stages {
 
-    /* ========== 1️⃣ CHECKOUT ========== */
+    /* ========== 1️⃣ CHECKOUT CODE ========== */
     stage('Checkout') {
       steps {
         git branch: 'main', url: 'https://github.com/sathya2003ME/kafkademoapplication.git'
@@ -22,7 +22,7 @@ pipeline {
       }
     }
 
-    /* ========== 2️⃣ BUILD & TEST ========== */
+    /* ========== 2️⃣ BUILD & UNIT TESTS ========== */
     stage('Build and Unit Test') {
       steps {
         echo "🏗️ Building project and running unit tests..."
@@ -36,31 +36,25 @@ pipeline {
       }
     }
 
+    /* ========== 3️⃣ PLAYWRIGHT TESTS (FRONTEND E2E) ========== */
     stage('Playwright Tests') {
-  steps {
-    script {
-      echo "🎭 Running Playwright tests..."
-      try {
-        sh '''
-          # Install node modules
-          npm ci
-
-          # Install Playwright browsers (no sudo, user-local install)
-          npx playwright install chromium --force
-
-          # Verify browser installation
-          npx playwright install-deps || true
-
-          # Run tests headlessly
-          CI=true npx playwright test --browser=chromium || true
-        '''
-      } catch (err) {
-        echo "⚠️ Playwright tests failed or skipped..."
+      steps {
+        script {
+          echo "🎭 Running Playwright tests..."
+          try {
+            dir('.') {
+              sh '''
+                npm ci
+                npx playwright install chromium
+                CI=true npx playwright test --browser=chromium --config=playwright.config.js
+              '''
+            }
+          } catch (err) {
+            echo "⚠️ Playwright tests failed or skipped..."
+          }
+        }
       }
     }
-  }
-}
-
 
     /* ========== 4️⃣ CODE COVERAGE ========== */
     stage('Code Coverage') {
@@ -82,7 +76,7 @@ pipeline {
               echo "🔑 Token length: ${#SONARQUBE}"
 
               mvn sonar:sonar \
-                -Dsonar.projectKey=kafka_demo \
+                -Dsonar.projectKey=kafkademoapplication \
                 -Dsonar.projectName="Kafka Demo Application" \
                 -Dsonar.host.url=$SONAR_HOST_URL \
                 -Dsonar.login=$SONARQUBE
@@ -92,7 +86,19 @@ pipeline {
       }
     }
 
-   
+    /* ========== 6️⃣ QUALITY GATE (OPTIONAL - NON-BLOCKING) ========== */
+    stage('Quality Gate') {
+      steps {
+        script {
+          echo "⏳ Waiting for Quality Gate result..."
+          def qg = waitForQualityGate()
+          echo "🧠 SonarQube Quality Gate status: ${qg.status}"
+          if (qg.status != 'OK') {
+            echo "⚠️ Quality Gate failed, but continuing (learning mode)..."
+          }
+        }
+      }
+    }
 
     /* ========== 7️⃣ DOCKER BUILD ========== */
     stage('Docker Build') {
@@ -100,18 +106,10 @@ pipeline {
         expression { currentBuild.currentResult == 'SUCCESS' }
       }
       steps {
-        echo "🐳 Building Docker image for Kafka demo..."
+        echo "🐳 Building Docker image..."
         sh 'docker build -t kafka-demo-app .'
       }
     }
-  }
 
-  post {
-    success {
-      echo "✅ All stages, including SonarQube, completed successfully!"
-    }
-    failure {
-      echo "❌ Pipeline failed. Check which stage failed in the logs."
-    }
-  }
-}
+    /* ========== 8️⃣ PUBLISH REPORTS ========== */
+    stage('Publish Reports') {
