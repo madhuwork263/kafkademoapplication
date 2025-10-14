@@ -54,7 +54,8 @@ pipeline {
       sh '''
         echo "=== SonarQube Analysis Started ==="
         echo "SonarQube URL: $SONAR_HOST_URL"
-        echo "🚀 Running SonarQube analysis using integrated environment..."
+        echo "🔍 Checking token length..."
+        echo "Token length: ${#SONAR_AUTH_TOKEN}"
 
         mvn sonar:sonar \
           -Dsonar.projectKey=kafka_demo \
@@ -65,6 +66,7 @@ pipeline {
     }
   }
 }
+
 
 
 
