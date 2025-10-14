@@ -8,8 +8,7 @@ pipeline {
   }
 
   environment {
-    SONAR_HOST_URL = 'http://139.59.14.75:9000'     // ✅ Actual SonarQube server (not localhost)
-    SONAR_TOKEN = credentials('sonarqube-token')     // ✅ Jenkins credential ID
+    SONAR_HOST_URL = 'http://139.59.14.75:9000'     // ✅ Your SonarQube server
   }
 
   stages {
@@ -48,25 +47,32 @@ pipeline {
         sh 'mvn jacoco:report'
       }
     }
-stage('SonarQube Analysis') {
-  steps {
-    withSonarQubeEnv('SonarQubeServer') {
-      sh '''
-        echo "Running SonarQube analysis..."
-        mvn sonar:sonar \
-          -Dsonar.projectKey=kafka_demo \
-          -Dsonar.projectName="Kafka Demo Application" \
-          -Dsonar.host.url=$SONAR_HOST_URL \
-          -Dsonar.projectBaseDir=$WORKSPACE
-      '''
-      echo "✅ SonarQube analysis completed successfully."
+
+    stage('SonarQube Analysis') {
+      steps {
+        // ✅ Use Jenkins SonarQube server config
+        withSonarQubeEnv('SonarQubeServer') {
+          // ✅ Securely inject the Sonar token from Jenkins credentials
+          withCredentials([string(credentialsId: 'sonarqube-token', variable: 'SONAR_TOKEN')]) {
+            sh '''
+              echo "Running SonarQube analysis..."
+              mvn sonar:sonar \
+                -Dsonar.projectKey=kafka_demo \
+                -Dsonar.projectName="Kafka Demo Application" \
+                -Dsonar.host.url=$SONAR_HOST_URL \
+                -Dsonar.login=$SONAR_TOKEN \
+                -Dsonar.projectBaseDir=$WORKSPACE
+            '''
+            echo "✅ SonarQube analysis completed successfully."
+          }
+        }
+      }
     }
-  }
-}
-
-
 
     stage('Docker Build') {
+      when {
+        expression { currentBuild.currentResult == 'SUCCESS' }
+      }
       steps {
         sh 'docker build -t kafka-demo-app .'
       }
