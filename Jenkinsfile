@@ -86,20 +86,7 @@ pipeline {
       }
     }
 
-    /* ========== 6️⃣ QUALITY GATE (OPTIONAL - NON-BLOCKING) ========== */
-    stage('Quality Gate') {
-      steps {
-        script {
-          echo "⏳ Waiting for Quality Gate result..."
-          def qg = waitForQualityGate()
-          echo "🧠 SonarQube Quality Gate status: ${qg.status}"
-          if (qg.status != 'OK') {
-            echo "⚠️ Quality Gate failed, but continuing (learning mode)..."
-          }
-        }
-      }
-    }
-
+   
     /* ========== 7️⃣ DOCKER BUILD ========== */
     stage('Docker Build') {
       when {
