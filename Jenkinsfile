@@ -34,7 +34,6 @@ pipeline {
                         mvn sonar:sonar \
                           -Dsonar.projectKey=kafkademoapplication \
                           -Dsonar.projectName="Kafka Demo Application" \
-                          -Dsonar.branch.name=${env.BRANCH_NAME} \
                           -Dsonar.host.url=$SONAR_HOST_URL \
                           -Dsonar.login=$SONAR_AUTH_TOKEN
                     """
