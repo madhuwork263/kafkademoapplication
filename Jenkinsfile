@@ -11,16 +11,17 @@ pipeline {
     }
 
     stages {
-
         stage('Checkout') {
             steps {
-                git branch: 'main', url: 'https://github.com/madhuwork263/kafkademoapplication.git'
+                checkout scm
+                script {
+                    echo "🔀 Building branch: ${env.BRANCH_NAME}"
+                }
             }
         }
 
         stage('Build') {
             steps {
-                echo "🏗️ Building Maven project with Java 17..."
                 sh 'mvn clean install -DskipTests'
             }
         }
@@ -28,14 +29,15 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
-                    echo "🚀 Running SonarQube Analysis..."
-                    sh '''
+                    echo "🚀 Running SonarQube Analysis on branch: ${env.BRANCH_NAME}"
+                    sh """
                         mvn sonar:sonar \
                           -Dsonar.projectKey=kafkademoapplication \
                           -Dsonar.projectName="Kafka Demo Application" \
+                          -Dsonar.branch.name=${env.BRANCH_NAME} \
                           -Dsonar.host.url=$SONAR_HOST_URL \
                           -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
+                    """
                 }
             }
         }
@@ -43,10 +45,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ SonarQube Analysis Completed Successfully!"
+            echo "✅ SonarQube Analysis completed for branch: ${env.BRANCH_NAME}"
         }
         failure {
-            echo "❌ SonarQube Analysis Failed. Check logs."
+            echo "❌ Pipeline failed on branch: ${env.BRANCH_NAME}"
         }
     }
 }
