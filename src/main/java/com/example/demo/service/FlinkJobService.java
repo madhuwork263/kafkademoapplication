@@ -19,6 +19,7 @@ public class FlinkJobService {
         this.wordCountJob = wordCountJob;
     }
 
+    // ---------------- EXISTING: Batch Job ----------------
     public List<WordCount> runWordCountJob() {
         try {
             List<String> sampleData = Arrays.asList(
@@ -35,6 +36,7 @@ public class FlinkJobService {
         }
     }
 
+    // ---------------- EXISTING: Streaming from File ----------------
     public String runStreamingWordCount(String inputPath) {
         try {
             wordCountJob.executeStreamingWordCount(env, inputPath);
@@ -42,6 +44,21 @@ public class FlinkJobService {
             return "Streaming job started successfully";
         } catch (Exception e) {
             throw new RuntimeException("Failed to execute streaming Flink job", e);
+        }
+    }
+
+    // 🟩🟩🟩 NEW SECTION: Kafka JSON Job 🟩🟩🟩
+    public String runKafkaJsonJob(String topic) {
+        try {
+            // Use the same Flink environment to run Kafka → JSON job
+            wordCountJob.executeKafkaJsonJob(env, topic);
+
+            // Run the Flink job
+            env.execute("Kafka JSON Processing Job");
+
+            return "Kafka JSON processing job started successfully!";
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to execute Kafka Flink job", e);
         }
     }
 }

@@ -96,6 +96,17 @@
             <artifactId>flink-connector-files</artifactId>
             <version>${flink.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-connector-kafka</artifactId>
+            <!-- Note: Use a version compatible with your Flink version and Kafka broker -->
+            <version>3.1.0-1.18</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.flink</groupId>
+            <artifactId>flink-core</artifactId>
+            <version>${flink.version}</version>  <!-- or match your Flink version -->
+        </dependency>
 
 
     </dependencies>
