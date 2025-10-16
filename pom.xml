@@ -104,21 +104,18 @@
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
-            <!-- Note: Use a version compatible with your Flink version and Kafka broker -->
             <version>3.1.0-1.18</version>
         </dependency>
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-core</artifactId>
-            <version>${flink.version}</version>  <!-- or match your Flink version -->
+            <version>${flink.version}</version>
         </dependency>
-
-
     </dependencies>
 
     <build>
         <plugins>
-            <!-- ✅ Existing Plugins (No Changes) -->
+            <!-- ✅ Existing Plugins -->
             <plugin>
                 <groupId>org.sonarsource.scanner.maven</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
@@ -155,23 +152,30 @@
                 </configuration>
             </plugin>
 
-            <!-- ✅ Added Plugins for Linting & Coverage -->
-            <!-- Jacoco (Coverage) -->
+            <!-- ✅ FIXED: JaCoCo Coverage Plugin -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.11</version>
                 <executions>
                     <execution>
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
                     <execution>
                         <id>report</id>
-                        <phase>verify</phase>
+                        <phase>test</phase>
                         <goals>
                             <goal>report</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report-aggregate</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report-aggregate</goal>
                         </goals>
                     </execution>
                 </executions>
