@@ -7,7 +7,7 @@ pipeline {
     }
 
     environment {
-        SONAR_HOST_URL = 'http://139.59.14.75:9000'
+        SONAR_HOST_URL = 'http://host.docker.internal:9000'
         SONAR_AUTH_TOKEN = credentials('SONAR_AUTH_TOKEN')
     }
 
@@ -19,9 +19,12 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build & Test') {
             steps {
-                sh 'mvn clean install -DskipTests'
+                sh '''
+                    echo "⚙️ Building and running tests with coverage..."
+                    mvn clean verify
+                '''
             }
         }
 
@@ -31,12 +34,6 @@ pipeline {
                     echo "🧹 Running Lint Analysis..."
                     mvn checkstyle:check spotbugs:spotbugs pmd:check || true
                 '''
-            }
-        }
-
-        stage('Code Coverage') {
-            steps {
-                sh 'mvn jacoco:report'
             }
         }
 
