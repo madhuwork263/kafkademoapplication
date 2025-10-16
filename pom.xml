@@ -100,7 +100,7 @@
             <artifactId>flink-connector-files</artifactId>
             <version>${flink.version}</version>
         </dependency>
-<<<<<<< HEAD
+
         <dependency>
             <groupId>org.apache.flink</groupId>
             <artifactId>flink-connector-kafka</artifactId>
@@ -114,8 +114,6 @@
         </dependency>
 
 
-=======
->>>>>>> 2d3b919 (Added SonarQube, linting, and coverage integration with JDK 21)
     </dependencies>
 
     <build>
