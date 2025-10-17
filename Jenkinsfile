@@ -21,8 +21,8 @@ pipeline {
 
         stage('Build & Test') {
             steps {
-                sh '''
-                    echo "⚙️ Building project and running tests with coverage..."
+                bat '''
+                    echo ⚙️ Building project and running tests with coverage...
                     gradle clean test jacocoTestReport
                 '''
             }
@@ -32,11 +32,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
                     echo "🚀 Running SonarQube Analysis for ${env.BRANCH_NAME}"
-                    sh '''
-                        gradle sonarqube \
-                          -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN
-                    '''
+                    bat """
+                        gradle sonarqube ^
+                          -Dsonar.host.url=%SONAR_HOST_URL% ^
+                          -Dsonar.login=%SONAR_AUTH_TOKEN%
+                    """
                 }
             }
         }
