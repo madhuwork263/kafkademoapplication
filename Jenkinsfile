@@ -3,7 +3,7 @@ pipeline {
 
     tools {
         jdk 'jdk21'
-        maven 'maven3'
+        gradle 'gradle8'
     }
 
     environment {
@@ -22,17 +22,8 @@ pipeline {
         stage('Build & Test') {
             steps {
                 sh '''
-                    echo "⚙️ Building and running tests with coverage..."
-                    mvn clean verify
-                '''
-            }
-        }
-
-        stage('Lint Checks') {
-            steps {
-                sh '''
-                    echo "🧹 Running Lint Analysis..."
-                    mvn checkstyle:check spotbugs:spotbugs pmd:check || true
+                    echo "⚙️ Building project and running tests with coverage..."
+                    gradle clean test jacocoTestReport
                 '''
             }
         }
@@ -41,21 +32,11 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQubeServer') {
                     echo "🚀 Running SonarQube Analysis for ${env.BRANCH_NAME}"
-                    sh """
-                        mvn sonar:sonar \
-                          -Dsonar.projectKey=kafkademoapplication \
-                          -Dsonar.projectName="Kafka Demo Application" \
+                    sh '''
+                        gradle sonarqube \
                           -Dsonar.host.url=$SONAR_HOST_URL \
-                          -Dsonar.login=$SONAR_AUTH_TOKEN \
-                          -Dsonar.sources=src/main/java \
-                          -Dsonar.tests=src/test/java \
-                          -Dsonar.java.binaries=target/classes \
-                          -Dsonar.junit.reportPaths=target/surefire-reports \
-                          -Dsonar.coverage.jacoco.xmlReportPaths=target/site/jacoco/jacoco.xml \
-                          -Dsonar.java.checkstyle.reportPaths=target/checkstyle-result.xml \
-                          -Dsonar.java.spotbugs.reportPaths=target/spotbugsXml.xml \
-                          -Dsonar.java.pmd.reportPaths=target/pmd.xml
-                    """
+                          -Dsonar.login=$SONAR_AUTH_TOKEN
+                    '''
                 }
             }
         }
@@ -63,10 +44,10 @@ pipeline {
 
     post {
         success {
-            echo "✅ SonarQube Analysis completed successfully for ${env.BRANCH_NAME}"
+            echo "✅ Gradle build and SonarQube Analysis completed successfully for ${env.BRANCH_NAME}"
         }
         failure {
-            echo "❌ Build or analysis failed for ${env.BRANCH_NAME}"
+            echo "❌ Build or SonarQube Analysis failed for ${env.BRANCH_NAME}"
         }
     }
 }
