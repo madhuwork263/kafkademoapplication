@@ -1,6 +1,7 @@
 package com.example.demo.config;
 
 import com.example.demo.model.JsonData;
+import com.example.demo.model.CanonicalTransaction;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -20,6 +21,7 @@ import java.util.Map;
 @Configuration
 public class KafkaConfig {
 
+    // ===================== Existing JsonData Producer ======================
     @Bean
     public ProducerFactory<String, JsonData> producerFactory() {
         Map<String, Object> config = new HashMap<>();
@@ -34,6 +36,22 @@ public class KafkaConfig {
         return new KafkaTemplate<>(producerFactory());
     }
 
+    // ===================== ✅ NEW CanonicalTransaction Producer ======================
+    @Bean
+    public ProducerFactory<String, CanonicalTransaction> canonicalProducerFactory() {
+        Map<String, Object> config = new HashMap<>();
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(config);
+    }
+
+    @Bean
+    public KafkaTemplate<String, CanonicalTransaction> canonicalKafkaTemplate() {
+        return new KafkaTemplate<>(canonicalProducerFactory());
+    }
+
+    // ===================== Consumer Factory ======================
     @Bean
     public ConsumerFactory<String, JsonData> consumerFactory() {
         JsonDeserializer<JsonData> deserializer = new JsonDeserializer<>(JsonData.class);
